@@ -30,7 +30,7 @@ defmodule ChessServer.Domain.MoveValidatorTest do
   end
 
   defp move(from, to) do
-    {:ok, m} = Move.new(from, to)
+    {:ok, m} = Move.from_strings(from, to)
     m
   end
 
