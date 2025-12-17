@@ -64,4 +64,31 @@ defmodule ChessServer.Domain.Board do
       place_piece(acc, pos, Piece.new(color, type))
     end)
   end
+
+  def to_fen(%__MODULE__{} = board) do
+    # Generate FEN piece placement
+    # Rank 7 (top) down to 0 (bottom)
+    ranks = for rank <- 7..0 do
+      rank_to_fen(board, rank)
+    end
+
+    Enum.join(ranks, "/")
+  end
+
+  defp rank_to_fen(board, rank) do
+    {fen, empty_count} =
+      Enum.reduce(0..7, {"", 0}, fn file, {acc_str, empty} ->
+        {:ok, pos} = Position.new(file, rank)
+        piece = get_piece(board, pos)
+
+        if piece do
+          str = if empty > 0, do: acc_str <> Integer.to_string(empty), else: acc_str
+          {str <> Piece.to_fen_char(piece), 0}
+        else
+          {acc_str, empty + 1}
+        end
+      end)
+
+    if empty_count > 0, do: fen <> Integer.to_string(empty_count), else: fen
+  end
 end

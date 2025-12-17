@@ -14,6 +14,8 @@ defmodule ChessServer.Application do
       ChessServer.Repo,
       # Start the Event Store
       ChessServer.EventStore,
+      # Start the Commanded Application
+      ChessServer.App,
       # Start the PubSub system
       {Phoenix.PubSub, name: ChessServer.PubSub},
       # Start the Endpoint (http/https)
