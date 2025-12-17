@@ -16,6 +16,8 @@ defmodule ChessServer.Application do
       ChessServer.EventStore,
       # Start the Commanded Application
       ChessServer.App,
+      # Start Projectors
+      ChessServer.Infrastructure.Projectors.GameProjector,
       # Start the PubSub system
       {Phoenix.PubSub, name: ChessServer.PubSub},
       # Start the Endpoint (http/https)
