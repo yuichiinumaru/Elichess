@@ -4,7 +4,7 @@ defmodule ChessServerWeb do
   as controllers, components, channels, and so on.
   """
 
-  def static_paths, do: ~w(assets fonts images favicon.ico robots.txt)
+  def static_paths, do: ~w(assets fonts images favicon.ico robots.txt css js index.html)
 
   def router do
     quote do
