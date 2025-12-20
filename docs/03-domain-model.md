@@ -9,9 +9,10 @@
 ## 📋 Table of Contents
 
 1. [Overview](#overview)
-2. [Core Entities](#core-entities)
-3. [Move Validation](#move-validation)
-4. [Game State](#game-state)
+2. [Standard Naming Convention](#standard-naming-convention)
+3. [Core Entities](#core-entities)
+4. [Move Validation](#move-validation)
+5. [Game State](#game-state)
 
 ---
 
@@ -23,6 +24,22 @@ Key characteristics:
 - **Immutability**: All operations return new state.
 - **Purity**: No side effects.
 - **Testability**: Easily unit tested.
+
+---
+
+## Standard Naming Convention
+
+We adhere to a hierarchical naming convention for better organization and discoverability, especially for Events.
+
+**Structure:**
+`Context.Entity.Action`
+
+**Examples:**
+- `ChessServer.Game.Started` (instead of `GameCreated`)
+- `ChessServer.Game.Progressed` (instead of `MoveMade`)
+- `ChessServer.Game.Finished` (Event for Checkmate/Draw)
+
+*Note: Current implementation uses `ChessServer.Domain.Events.*`. Refactoring to this standard is planned.*
 
 ---
 
@@ -61,10 +78,11 @@ The `MoveValidator` module enforces standard chess rules.
 - Piece movement patterns (Pawn, Knight, Bishop, Rook, Queen, King)
 - Path blocking (cannot jump over pieces, except Knight)
 - Capturing rules (cannot capture own pieces)
-- Board boundaries
+- **Advanced Rules:** En Passant, Castling, Promotion.
+- **Safety:** Check validation (cannot move King into check).
 
 \`\`\`elixir
-MoveValidator.valid_move?(board, move, :white)
+MoveValidator.valid_move?(game_state, move)
 # returns :ok or {:error, reason}
 \`\`\`
 
@@ -72,7 +90,7 @@ MoveValidator.valid_move?(board, move, :white)
 
 ## Game State
 
-`GameState` is the aggregate root for the domain logic. It holds the `Board`, current `turn_color`, `status`, and `move_count`.
+`GameState` is the aggregate root for the domain logic. It holds the `Board`, current `turn_color`, `status`, `move_count`, and advanced tracking fields (`en_passant_target`, `castling_rights`).
 
 \`\`\`elixir
 {:ok, new_state} = GameState.make_move(current_state, move)
@@ -80,10 +98,10 @@ MoveValidator.valid_move?(board, move, :white)
 
 It handles:
 1. Validating the move via `MoveValidator`.
-2. Updating the `Board`.
-3. Switching turns.
-4. Incrementing move count.
+2. Applying moves, captures, castling, and promotion.
+3. Detecting Game Over conditions via `GameRules` (Checkmate, Stalemate, 50-move rule).
+4. Switching turns.
 
 ---
-**Version:** 1.0
-**Status:** 🟢 Implemented
+**Version:** 1.1
+**Status:** 🟢 Updated (Advanced Rules)
