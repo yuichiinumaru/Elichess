@@ -1,6 +1,6 @@
 defmodule ChessServer.Domain.Aggregates.Game do
   alias ChessServer.Domain.Commands.{CreateGame, MakeMove}
-  alias ChessServer.Domain.Events.{GameCreated, MoveMade}
+  alias ChessServer.Domain.Events.{GameCreated, MoveMade, GameFinished}
   alias ChessServer.Domain.{Board, Move, GameState}
 
   # Command Handlers
@@ -20,14 +20,33 @@ defmodule ChessServer.Domain.Aggregates.Game do
     with {:ok, move} <- Move.from_strings(cmd.from, cmd.to, cmd.promotion) do
         case GameState.make_move(state, move) do
           {:ok, new_state} ->
-            %MoveMade{
-              game_id: cmd.game_id,
-              from: cmd.from,
-              to: cmd.to,
-              fen: Board.to_fen(new_state.board),
-              turn_color: new_state.turn_color,
-              promotion: cmd.promotion
-            }
+            events = [
+              %MoveMade{
+                game_id: cmd.game_id,
+                from: cmd.from,
+                to: cmd.to,
+                fen: Board.to_fen(new_state.board),
+                turn_color: new_state.turn_color,
+                promotion: cmd.promotion
+              }
+            ]
+
+            # Check if game finished and append event
+            if new_state.status != :active do
+              winner = case new_state.status do
+                :checkmate_white_wins -> :white
+                :checkmate_black_wins -> :black
+                _ -> nil # Draw
+              end
+
+              events ++ [%GameFinished{
+                game_id: cmd.game_id,
+                reason: new_state.status,
+                winner: winner
+              }]
+            else
+              events
+            end
 
           {:error, reason} -> {:error, reason}
         end
@@ -36,6 +55,9 @@ defmodule ChessServer.Domain.Aggregates.Game do
     end
   end
 
+  # Ignore commands if game finished
+  def execute(%GameState{}, %MakeMove{}), do: {:error, :game_finished}
+
   # State Mutators (Apply)
 
   def apply(nil, %GameCreated{} = event) do
@@ -43,12 +65,15 @@ defmodule ChessServer.Domain.Aggregates.Game do
   end
 
   def apply(%GameState{} = state, %MoveMade{} = event) do
-    # Now we have promotion info in event
     {:ok, move} = Move.from_strings(event.from, event.to, event.promotion)
 
     case GameState.make_move(state, move) do
       {:ok, new_state} -> new_state
       {:error, _} -> state
     end
+  end
+
+  def apply(%GameState{} = state, %GameFinished{} = event) do
+    %{state | status: event.reason}
   end
 end

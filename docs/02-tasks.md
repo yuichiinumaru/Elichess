@@ -1,228 +1,114 @@
-# 02 - Project Tasks & Roadmap
+# Detailed Project Roadmap & Task List
 
-**Status:** 🟡 In Progress
-**Total Progress:** ~60%
+This document serves as the granular, step-by-step task list based on expert architectural feedback.
 
----
-
-## 📋 Phase 0: Initialization & Documentation (✅ Completed)
-
-### 0.1 Documentation Structure
-- [x] Create `docs/` directory.
-- [x] Move `forge_00_index.md` to `docs/00-index.md`.
-- [x] Move `forge_01_getting_started.md` to `docs/01-getting-started.md`.
-- [x] Move `forge_02_architecture.md` to `docs/02-architecture.md`.
-- [x] Move `docs_README.md` to `docs/README.md`.
-- [x] Move `PROJECT.md` to `docs/PROJECT.md`.
-- [x] Rename `_Servidor...` file to `docs/archive_conversation.md`.
-- [x] Verify links between documents.
-
-### 0.2 Document Creation
-- [x] Write `docs/03-domain-model.md` covering Entities and Validation.
-- [x] Write `docs/04-cqrs-pattern.md` explaining Command/Query flow.
-- [x] Write `docs/05-api-reference.md` documenting endpoints.
-- [x] Write `docs/06-deployment.md` with Docker instructions.
-- [x] Write `docs/07-testing.md` outlining strategy.
-- [x] Write `docs/08-performance.md` with targets.
-- [x] Write `docs/09-troubleshooting.md` for common errors.
+## Status Legend
+- [x] Completed
+- [ ] Pending
 
 ---
 
-## 🛠️ Phase 1: Environment & Project Setup (✅ Completed)
+## ♟️ Phase 6: Advanced Chess Rules (Core Logic)
 
-### 1.1 Elixir Project Scaffolding
-- [x] Install/Verify Elixir version (1.14+).
-- [x] Create generic mix project structure (`mix new` equivalent manual setup).
-- [x] Configure `.gitignore` for `_build`, `deps`, `bin`.
+**Goal:** Ensure the chess engine enforces all rules strictly, including game termination.
 
-### 1.2 Dependencies & Configuration
-- [x] Create `mix.exs`.
-- [x] Add dependency: `phoenix`.
-- [x] Add dependency: `ecto_sql` & `postgrex`.
-- [x] Add dependency: `commanded`.
-- [x] Add dependency: `eventstore`.
-- [x] Add dependency: `jason`.
-- [x] Create `config/config.exs` (Base config).
-- [x] Create `config/dev.exs` (Development environment).
-- [x] Create `config/test.exs` (Test environment).
-- [x] Create `config/prod.exs` (Production environment).
+- [x] **En Passant**
+    - [x] Add `en_passant_target` to `GameState`.
+    - [x] Update `MoveValidator` to validate En Passant moves.
+    - [x] Update `GameState` to execute En Passant capture (remove pawn).
+    - [x] Add tests.
 
-### 1.3 Application Architecture
-- [x] Create `lib/chess_server/application.ex` (OTP Supervisor).
-- [x] Create `lib/chess_server/repo.ex` (Ecto Repo).
-- [x] Create `lib/chess_server/event_store.ex` (Commanded Adapter).
-- [x] Create `lib/chess_server_web/endpoint.ex` (Phoenix Endpoint).
-- [x] Register children in Supervisor: `Repo`, `EventStore`, `Endpoint`.
+- [x] **Castling (Roque)**
+    - [x] Add `castling_rights` to `GameState`.
+    - [x] Implement validation: King/Rook moved? Path clear?
+    - [x] **Critical:** Implement "Path Safe" check (King cannot pass through check).
+    - [x] Update `GameState` to move Rook along with King.
+    - [x] Add tests.
 
----
+- [x] **Check & Checkmate (Xeque & Mate)**
+    - [x] Implement `CheckValidator.is_in_check?/2`.
+    - [x] Integrate `CheckValidator` into `MoveValidator` (Prevent self-check).
+    - [x] Implement `GameRules` for Game Over detection (Checkmate vs Stalemate).
+    - [x] Add tests for Fool's Mate and Stalemate positions.
 
-## ♟️ Phase 2: Domain Model Implementation (✅ Completed)
+- [x] **Promotion**
+    - [x] Update `Move` struct to accept `promotion` type.
+    - [x] Update `MoveMade` event to persist `promotion` selection.
+    - [x] Update `GameState` to replace Pawn with promoted piece.
 
-### 2.1 Core Entities
-- [x] Implement `ChessServer.Domain.Position`.
-  - [x] Struct definition (`file`, `rank`).
-  - [x] `new/2` with range validation (0..7).
-  - [x] `from_string/1` (e.g., "e4").
-- [x] Implement `ChessServer.Domain.Piece`.
-  - [x] Struct definition (`color`, `type`).
-  - [x] `to_fen_char/1`.
-  - [x] `from_fen_char/1`.
-- [x] Implement `ChessServer.Domain.Board`.
-  - [x] Map-based storage (`%{Position => Piece}`).
-  - [x] `place_piece/3`.
-  - [x] `move_piece/3`.
-  - [x] `initial_setup/0` (Standard chess layout).
-  - [x] `to_fen/1` (Serialize to FEN string).
-
-### 2.2 Logic & Rules
-- [x] Implement `ChessServer.Domain.Move`.
-  - [x] Struct definition (`from`, `to`, `promotion`).
-- [x] Implement `ChessServer.Domain.MoveValidator`.
-  - [x] Basic validation (bounds, turn color).
-  - [x] Pawn logic (push, double push, capture).
-  - [x] Knight logic (L-shape).
-  - [x] Bishop/Rook/Queen logic (sliding + path clear).
-  - [x] King logic (1 square).
-  - [x] Friendly fire prevention.
-- [x] Implement `ChessServer.Domain.GameState`.
-  - [x] Struct definition (Aggregate State).
-  - [x] `make_move/2` (State transition logic).
-  - [x] Turn switching logic.
-
-### 2.3 Domain Testing
-- [x] Create `test/chess_server/domain/board_test.exs`.
-- [x] Create `test/chess_server/domain/move_validator_test.exs`.
+- [x] **50-Move Rule**
+    - [x] Track `half_move_clock`.
+    - [x] Reset on Pawn move or Capture.
+    - [x] Declare Draw if clock >= 100.
 
 ---
 
-## 🔄 Phase 3: CQRS Foundation (✅ Completed)
+## 🏗 Phase 7: Architecture Refactoring (Tech Debt & Scalability)
 
-### 3.1 Commands & Events
-- [x] Create `ChessServer.Domain.Commands.CreateGame`.
-- [x] Create `ChessServer.Domain.Commands.MakeMove`.
-- [x] Create `ChessServer.Domain.Events.GameCreated`.
-- [x] Create `ChessServer.Domain.Events.MoveMade`.
-- [x] Ensure `Jason.Encoder` derivation for serialization.
+**Goal:** Fix race conditions, standardize events, and prepare for scaling.
 
-### 3.2 Aggregate Root
-- [x] Create `ChessServer.Domain.Aggregates.Game`.
-- [x] Implement `execute/2` for `CreateGame`.
-  - [x] Handle `nil` state (initial creation).
-  - [x] Validate uniqueness (idempotency check).
-- [x] Implement `execute/2` for `MakeMove`.
-  - [x] Delegate to `GameState.make_move/2`.
-  - [x] Return `MoveMade` event with FEN.
-- [x] Implement `apply/2` for `GameCreated`.
-  - [x] Initialize `GameState`.
-- [x] Implement `apply/2` for `MoveMade`.
-  - [x] Update board and turn.
+### 7.1. Fix "Addicted Read" (Race Condition)
+- [x] **PubSub Integration**
+    - [x] Add `Phoenix.PubSub` broadcast to `GameProjector` after DB update.
+    - [x] Broadcast topic: `"games:{id}"`.
+    - [x] Payload: `{:game_updated, game_struct}`.
 
-### 3.3 Wiring
-- [x] Create `ChessServer.Router`.
-  - [x] Dispatch commands to `Game` aggregate.
-- [x] Create `ChessServer.App` (Commanded Application).
-- [x] Update `application.ex` to start `ChessServer.App`.
-- [x] Create `GameTest` for Aggregate logic.
+### 7.2. Projector Safety
+- [x] **Remove Changeset Validation**
+    - [x] Refactor `GameProjector` to use `Repo.insert!` and `Repo.update!` directly.
+    - [x] Ensure Events are treated as facts, not user input.
 
----
+### 7.3. Event Standardization (Semantic Events)
+- [ ] **Define Semantic Events**
+    - [ ] Create `ChessServer.Domain.Events.PieceCaptured` (game_id, piece, square).
+    - [ ] Create `ChessServer.Domain.Events.KingChecked` (game_id, color).
+    - [ ] Create `ChessServer.Domain.Events.PawnPromoted` (game_id, square, piece_type).
+- [ ] **Refactor Aggregate to Emit Rich Events**
+    - [ ] Update `Game.execute` to emit list of events: `[MoveMade, PieceCaptured?, KingChecked?, GameFinished?]`.
+    - [ ] Ensure `MoveMade` remains the primary event for state reconstruction.
 
-## 📖 Phase 4: Read Model & Projections (✅ Completed)
+### 7.4. Naming Convention (Refactoring)
+- [ ] **Rename Modules to Standard**
+    - [ ] Rename `GameCreated` -> `ChessServer.Game.Started`.
+    - [ ] Rename `MoveMade` -> `ChessServer.Game.Progressed`.
+    - [ ] Rename `GameFinished` -> `ChessServer.Game.Finished`.
+    - [ ] Update all references in Aggregates, Projectors, and Tests.
 
-### 4.1 Database Schema
-- [x] Create Migration `create_games`.
-  - [x] Fields: `id`, `white`, `black`, `fen`, `status`.
-- [x] Create Schema `ChessServer.Infrastructure.Projections.Game`.
-  - [x] Ecto schema definition.
-  - [x] Changeset for validation.
-
-### 4.2 Projectors
-- [x] Create `ChessServer.Infrastructure.Projectors.GameProjector`.
-  - [x] Use `Commanded.Event.Handler`.
-  - [x] Handle `GameCreated` (Insert).
-  - [x] Handle `MoveMade` (Update FEN/Turn).
-- [x] Register Projector in supervision tree.
+### 7.5. Read Model Library
+- [ ] **Migrate to `commanded_ecto_projections`**
+    - [ ] Add dependency `commanded_ecto_projections`.
+    - [ ] Replace `GameProjector` (EventHandler) with `EctoProjection` module.
+    - [ ] Verify database migrations and replay capability.
 
 ---
 
-## 🌐 Phase 5: API Layer (✅ Completed)
+## 🚀 Phase 8: New Features & Domain Separation
 
-### 5.1 Web Infrastructure
-- [x] Create `ChessServerWeb`.
-- [x] Create `ChessServerWeb.Router`.
-  - [x] Define `/api` scope.
-- [x] Create `ChessServerWeb.Telemetry`.
-- [x] Create `ChessServerWeb.ErrorJSON`.
-- [x] Create `ChessServerWeb.FallbackController`.
+### 8.1. Domain Separation
+- [ ] **Extract Pure Logic**
+    - [ ] Create `ChessServer.Chess` context (or similar pure module).
+    - [ ] Move `Board`, `MoveValidator`, `GameRules` logic into this context.
+    - [ ] Ensure `Game` aggregate delegates to `ChessServer.Chess` functions.
+    - [ ] *Goal:* Allow other aggregates (DailyProblem) to use the same logic.
 
-### 5.2 Controllers
-- [x] Create `ChessServerWeb.GameController`.
-  - [x] `POST /api/games` (Dispatch CreateGame).
-  - [x] `GET /api/games/:id` (Read Projection).
-  - [x] `POST /api/games/:id/move` (Dispatch MakeMove).
-- [x] Create `ChessServerWeb.GameJSON`.
-  - [x] JSON formatting for Game resource.
+### 8.2. Game Modes
+- [ ] **Time Controls**
+    - [ ] Add `time_control` to `CreateGame` command (Blitz, Rapid, Classic).
+    - [ ] Implement Timer Logic (GenServer or check timestamps).
+- [ ] **Draw Offers**
+    - [ ] Add command `OfferDraw`.
+    - [ ] Add event `DrawOffered`.
+    - [ ] Add command `RespondToDraw` (Accept/Decline).
 
----
-
-## 🚧 Phase 6: Advanced Rules (TODO)
-
-### 6.1 Special Moves
-- [ ] **En Passant**
-  - [ ] Update `GameState` to track `en_passant_square`.
-  - [ ] Update `MoveValidator` for pawn capture.
-  - [ ] Update `MoveMade` event to include special state.
-- [ ] **Castling**
-  - [ ] Update `GameState` to track `castling_rights` (KQkq).
-  - [ ] Update `MoveValidator` to check rights and path.
-  - [ ] Update `Board` to move Rook along with King.
-- [ ] **Promotion**
-  - [ ] Handle `promotion` field in `Move`.
-  - [ ] Update `Board` to replace Pawn with requested piece.
-
-### 6.2 Game End Conditions
-- [ ] **Check Detection**
-  - [ ] Implement `is_check?(board, color)`.
-  - [ ] Prevent moves that leave King in check.
-- [ ] **Checkmate**
-  - [ ] Implement `is_checkmate?`.
-  - [ ] Update `GameState` status to `:white_won` or `:black_won`.
-- [ ] **Stalemate**
-  - [ ] Implement `is_stalemate?`.
-  - [ ] Update status to `:draw`.
+### 8.3. Strong Typing
+- [ ] **Refactor Primitives**
+    - [ ] Replace `:white`/`:black` atoms with `ChessServer.Domain.Color` struct or Enum where appropriate.
+    - [ ] Ensure type safety in Command definitions.
 
 ---
 
-## 🚀 Phase 7: Deployment & Ops (TODO)
+## 📅 Roadmap Summary
 
-### 7.1 Containerization
-- [ ] Create `Dockerfile`.
-  - [ ] Multi-stage build (Builder vs Runner).
-  - [ ] Install hex/rebar.
-  - [ ] Compile release.
-- [ ] Create `docker-compose.yml`.
-  - [ ] Service: `db` (Postgres).
-  - [ ] Service: `app` (Phoenix).
-  - [ ] Service: `eventstore` (if separate DB needed).
-
-### 7.2 Production Hardening
-- [ ] Configure SSL in `prod.exs`.
-- [ ] Setup `rel/env.sh.eex`.
-- [ ] Add Health Check endpoint.
-
----
-
-## 🧪 Phase 8: Testing & Quality (TODO)
-
-### 8.1 Integration Tests
-- [ ] Implement `ChessServerWeb.GameControllerTest` with real DB.
-- [ ] Test full CQRS loop (Command -> Event -> Projection -> Query).
-
-### 8.2 Code Quality
-- [ ] Run `mix format`.
-- [ ] Run `mix credo --strict`.
-- [ ] Run `mix dialyzer`.
-
-### 8.3 Performance Benchmarks
-- [ ] Create `bench/perft.exs`.
-- [ ] Measure nodes per second (NPS).
-- [ ] Measure API latency under load.
+1.  **Immediate:** Complete Phase 7.3 (Semantic Events) and 7.4 (Naming Convention).
+2.  **Next:** Migrate to `commanded_ecto_projections` (Phase 7.5).
+3.  **Future:** Implement Game Modes and Draw Offers (Phase 8).
