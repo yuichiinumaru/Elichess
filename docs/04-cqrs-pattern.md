@@ -12,6 +12,7 @@
 2. [Write Side (Command)](#write-side-command)
 3. [Read Side (Query)](#read-side-query)
 4. [Event Flow](#event-flow)
+5. [Refactoring Goals](#refactoring-goals)
 
 ---
 
@@ -39,6 +40,8 @@ The authoritative source of truth.
 - **Logic**:
   - `execute/2`: Validates command against current state, emits events.
   - `apply/2`: Mutates state based on events.
+
+*Note: Calculations are strictly kept OUTSIDE the aggregate module itself, delegated to pure domain modules (`GameRules`, `GameState`) to support reusability in other contexts (e.g., Daily Problems).*
 
 \`\`\`elixir
 # Example Execute
@@ -75,5 +78,16 @@ Event handlers that update the Read DB.
 7. **Controller** returns 201 Created.
 
 ---
-**Version:** 1.0
-**Status:** 🟢 Implemented
+
+## Refactoring Goals
+
+Based on architectural review, the following improvements are planned:
+
+1.  **Read Model Library**: Switch from manual `Commanded.Event.Handler` to **`commanded_ecto_projections`**.
+    *   *Reason*: Manual handlers face concurrency issues when rebuilding the database from event history. `commanded_ecto_projections` handles idempotency and transactions robustly.
+
+2.  **Real-time Updates**: Emit events to `Phoenix.PubSub` immediately after persistence to support reactive UIs (Webhooks/Sockets).
+
+---
+**Version:** 1.1
+**Status:** 🟡 Refactoring Planned
