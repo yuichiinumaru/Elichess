@@ -4,14 +4,14 @@ defmodule ChessServer.Infrastructure.Projectors.GameProjector do
     name: "GameProjector"
 
   alias ChessServer.Infrastructure.Projections.Game
-  alias ChessServer.Domain.Events.{GameCreated, MoveMade, GameFinished}
+  alias ChessServer.Game.{Started, Progressed, Finished}
   alias ChessServer.Repo
   alias Phoenix.PubSub
 
   @doc """
-  Handle GameCreated event: Insert a new game row directly.
+  Handle Started event: Insert a new game row directly.
   """
-  def handle(%GameCreated{} = event, _metadata) do
+  def handle(%Started{} = event, _metadata) do
     game = %Game{
       id: event.game_id,
       white_player: event.white_player,
@@ -31,9 +31,9 @@ defmodule ChessServer.Infrastructure.Projectors.GameProjector do
   end
 
   @doc """
-  Handle MoveMade event: Update existing game row directly.
+  Handle Progressed event: Update existing game row directly.
   """
-  def handle(%MoveMade{} = event, _metadata) do
+  def handle(%Progressed{} = event, _metadata) do
     # Fetch current state. If not found, it's a fatal error in projection consistency.
     game = Repo.get!(Game, event.game_id)
 
@@ -43,10 +43,6 @@ defmodule ChessServer.Infrastructure.Projectors.GameProjector do
       turn_color: Atom.to_string(event.turn_color),
       move_count: game.move_count + 1
     ]
-
-    # Ecto.Changeset.change/2 is safe for internal data if we trust it, or just use struct update.
-    # But Ecto.Repo.update! expects a changeset.
-    # We can use Ecto.Changeset.change(game, changes) which skips validation.
 
     result = game
     |> Ecto.Changeset.change(changes)
@@ -58,18 +54,13 @@ defmodule ChessServer.Infrastructure.Projectors.GameProjector do
   end
 
   @doc """
-  Handle GameFinished event.
+  Handle Finished event.
   """
-  def handle(%GameFinished{} = event, _metadata) do
+  def handle(%Finished{} = event, _metadata) do
     game = Repo.get!(Game, event.game_id)
 
     result = game
-    |> Ecto.Changeset.change(status: Atom.to_string(event.reason), winner: event.winner) # Assuming we add winner column or just store in status
-    # Wait, status usually holds "checkmate_white_wins".
-    # Let's verify standard status usage.
-    # Ideally status = "finished", result = "white_wins".
-    # Current code uses "active".
-    # I will stick to updating `status` with the reason string for now.
+    |> Ecto.Changeset.change(status: Atom.to_string(event.reason), winner: event.winner)
     |> Repo.update!()
 
     broadcast_update(event.game_id, result)

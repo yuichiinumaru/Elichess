@@ -1,22 +1,22 @@
-defmodule ChessServer.Domain.Aggregates.GameTest do
+defmodule ChessServer.GameTest do
   use ExUnit.Case
-  alias ChessServer.Domain.Aggregates.Game
+  alias ChessServer.Game
   alias ChessServer.Domain.Commands.{CreateGame, MakeMove}
-  alias ChessServer.Domain.Events.{GameCreated, MoveMade}
+  alias ChessServer.Game.{Started, Progressed}
   alias ChessServer.Domain.GameState
 
-  test "execute CreateGame returns GameCreated event" do
+  test "execute CreateGame returns Started event" do
     cmd = %CreateGame{game_id: "game-1", white_player: "white", black_player: "black"}
 
-    assert %GameCreated{
+    assert %Started{
       game_id: "game-1",
       white_player: "white",
       black_player: "black"
     } = Game.execute(nil, cmd)
   end
 
-  test "apply GameCreated creates initial state" do
-    event = %GameCreated{
+  test "apply Started creates initial state" do
+    event = %Started{
       game_id: "game-1",
       white_player: "white",
       black_player: "black"
@@ -32,7 +32,7 @@ defmodule ChessServer.Domain.Aggregates.GameTest do
     assert state.move_count == 0
   end
 
-  test "execute MakeMove returns MoveMade event with correct FEN" do
+  test "execute MakeMove returns Progressed event with correct FEN" do
     initial_state = GameState.new("game-1", "white", "black")
 
     cmd = %MakeMove{
@@ -41,28 +41,30 @@ defmodule ChessServer.Domain.Aggregates.GameTest do
       to: "e4"
     }
 
-    event = Game.execute(initial_state, cmd)
+    # execute returns a list of events now
+    events = Game.execute(initial_state, cmd)
 
-    assert %MoveMade{
+    assert [%Progressed{
       game_id: "game-1",
       from: "e2",
       to: "e4",
       turn_color: :black
-    } = event
+    }] = events
 
+    [event] = events
     # Check FEN roughly (not full string validation here)
     assert is_binary(event.fen)
   end
 
-  test "apply MoveMade updates state" do
+  test "apply Progressed updates state" do
     initial_state = GameState.new("game-1", "white", "black")
 
-    event = %MoveMade{
+    event = %Progressed{
       game_id: "game-1",
       from: "e2",
       to: "e4",
       turn_color: :black,
-      fen: "some-fen", # Ignored by current apply impl?
+      fen: "some-fen",
       promotion: nil
     }
 
@@ -70,13 +72,6 @@ defmodule ChessServer.Domain.Aggregates.GameTest do
 
     assert new_state.turn_color == :black
     assert new_state.move_count == 1
-    # Check board update (pawn moved)
-    # e2 empty, e4 has pawn
-    # We need to verify board state
-    # Board implementation: get_piece
-
-    # Wait, we can't easily check board internals if not exposed or helper.
-    # But GameState exposes board.
 
     alias ChessServer.Domain.{Board, Position}
     {:ok, e2} = Position.from_string("e2")

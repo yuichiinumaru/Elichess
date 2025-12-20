@@ -1,12 +1,12 @@
-defmodule ChessServer.Domain.Aggregates.Game do
+defmodule ChessServer.Game do
   alias ChessServer.Domain.Commands.{CreateGame, MakeMove}
-  alias ChessServer.Domain.Events.{GameCreated, MoveMade, GameFinished}
+  alias ChessServer.Game.{Started, Progressed, Finished}
   alias ChessServer.Domain.{Board, Move, GameState}
 
   # Command Handlers
 
   def execute(nil, %CreateGame{} = cmd) do
-    %GameCreated{
+    %Started{
       game_id: cmd.game_id,
       white_player: cmd.white_player,
       black_player: cmd.black_player
@@ -21,7 +21,7 @@ defmodule ChessServer.Domain.Aggregates.Game do
         case GameState.make_move(state, move) do
           {:ok, new_state} ->
             events = [
-              %MoveMade{
+              %Progressed{
                 game_id: cmd.game_id,
                 from: cmd.from,
                 to: cmd.to,
@@ -39,7 +39,7 @@ defmodule ChessServer.Domain.Aggregates.Game do
                 _ -> nil # Draw
               end
 
-              events ++ [%GameFinished{
+              events ++ [%Finished{
                 game_id: cmd.game_id,
                 reason: new_state.status,
                 winner: winner
@@ -60,11 +60,11 @@ defmodule ChessServer.Domain.Aggregates.Game do
 
   # State Mutators (Apply)
 
-  def apply(nil, %GameCreated{} = event) do
+  def apply(nil, %Started{} = event) do
     GameState.new(event.game_id, event.white_player, event.black_player)
   end
 
-  def apply(%GameState{} = state, %MoveMade{} = event) do
+  def apply(%GameState{} = state, %Progressed{} = event) do
     {:ok, move} = Move.from_strings(event.from, event.to, event.promotion)
 
     case GameState.make_move(state, move) do
@@ -73,7 +73,7 @@ defmodule ChessServer.Domain.Aggregates.Game do
     end
   end
 
-  def apply(%GameState{} = state, %GameFinished{} = event) do
+  def apply(%GameState{} = state, %Finished{} = event) do
     %{state | status: event.reason}
   end
 end
