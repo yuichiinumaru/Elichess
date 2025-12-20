@@ -1,0 +1,28 @@
+/* Molecules */
+
+/* Card */
+.card {
+  background: rgba(255, 255, 255, 0.05);
+  padding: var(--spacing-md);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Modal Content */
+.modal-content {
+  background: var(--bg-color);
+  padding: var(--spacing-lg);
+  border: 1px solid var(--accent-color);
+  text-align: center;
+}
+
+/* Promotion Option */
+.promo-piece {
+  cursor: pointer;
+  padding: var(--spacing-sm);
+  border: 1px solid transparent;
+}
+
+.promo-piece:hover {
+  border-color: var(--accent-color);
+}

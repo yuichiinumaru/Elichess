@@ -1,0 +1,51 @@
+/* Templates & Base */
+
+:root {
+  /* Elegant Palette */
+  --bg-color: #1a1a1d;
+  --text-color: #f0f0f0;
+  --board-dark: #6f4e37; /* Coffee */
+  --board-light: #f5deb3; /* Wheat */
+  --accent-color: #d4af37; /* Gold */
+  --accent-hover: #b4941f;
+  --highlight-move: rgba(212, 175, 55, 0.5);
+  --highlight-check: rgba(255, 0, 0, 0.5);
+
+  /* Typography */
+  --font-main: 'Inter', system-ui, sans-serif;
+  --font-serif: 'Georgia', serif;
+
+  /* Spacing */
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 32px;
+
+  /* Dimensions */
+  --board-size: min(80vh, 600px);
+  --square-size: calc(var(--board-size) / 8);
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: var(--font-main);
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.container {
+  display: flex;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-md);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.game-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}

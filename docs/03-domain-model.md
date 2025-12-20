@@ -35,11 +35,11 @@ We adhere to a hierarchical naming convention for better organization and discov
 `Context.Entity.Action`
 
 **Examples:**
-- `ChessServer.Game.Started` (instead of `GameCreated`)
-- `ChessServer.Game.Progressed` (instead of `MoveMade`)
+- `ChessServer.Game.Started` (previously `GameCreated`)
+- `ChessServer.Game.Progressed` (previously `MoveMade`)
 - `ChessServer.Game.Finished` (Event for Checkmate/Draw)
 
-*Note: Current implementation uses `ChessServer.Domain.Events.*`. Refactoring to this standard is planned.*
+*Note: The implementation now follows this standard.*
 
 ---
 
@@ -103,5 +103,5 @@ It handles:
 4. Switching turns.
 
 ---
-**Version:** 1.1
-**Status:** 🟢 Updated (Advanced Rules)
+**Version:** 1.2
+**Status:** 🟢 Updated (Naming Convention Refactoring)
