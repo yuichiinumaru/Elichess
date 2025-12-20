@@ -1,12 +1,12 @@
 defmodule ChessServer.Infrastructure.Projectors.GameProjectorTest do
   use ChessServer.DataCase
   alias ChessServer.Infrastructure.Projectors.GameProjector
-  alias ChessServer.Domain.Events.{GameCreated, MoveMade, GameFinished}
+  alias ChessServer.Game.{Started, Progressed, Finished}
   alias ChessServer.Infrastructure.Projections.Game
   alias ChessServer.Repo
 
-  test "handle GameCreated inserts game" do
-    event = %GameCreated{
+  test "handle Started inserts game" do
+    event = %Started{
       game_id: "game-proj-1",
       white_player: "white",
       black_player: "black"
@@ -19,7 +19,7 @@ defmodule ChessServer.Infrastructure.Projectors.GameProjectorTest do
     assert Repo.get(Game, "game-proj-1")
   end
 
-  test "handle MoveMade updates game" do
+  test "handle Progressed updates game" do
     # Insert initial
     Repo.insert!(%Game{
       id: "game-proj-2",
@@ -30,7 +30,7 @@ defmodule ChessServer.Infrastructure.Projectors.GameProjectorTest do
       move_count: 0
     })
 
-    event = %MoveMade{
+    event = %Progressed{
       game_id: "game-proj-2",
       from: "e2",
       to: "e4",
@@ -46,7 +46,7 @@ defmodule ChessServer.Infrastructure.Projectors.GameProjectorTest do
     assert game.fen == "new-fen"
   end
 
-  test "handle GameFinished updates status" do
+  test "handle Finished updates status" do
     Repo.insert!(%Game{
       id: "game-proj-3",
       white_player: "w",
@@ -55,7 +55,7 @@ defmodule ChessServer.Infrastructure.Projectors.GameProjectorTest do
       move_count: 10
     })
 
-    event = %GameFinished{
+    event = %Finished{
       game_id: "game-proj-3",
       reason: :checkmate_white_wins,
       winner: :white

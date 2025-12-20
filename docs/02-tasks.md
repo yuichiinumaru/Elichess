@@ -68,11 +68,11 @@ This document serves as the granular, step-by-step task list based on expert arc
     - [ ] Ensure `MoveMade` remains the primary event for state reconstruction.
 
 ### 7.4. Naming Convention (Refactoring)
-- [ ] **Rename Modules to Standard**
-    - [ ] Rename `GameCreated` -> `ChessServer.Game.Started`.
-    - [ ] Rename `MoveMade` -> `ChessServer.Game.Progressed`.
-    - [ ] Rename `GameFinished` -> `ChessServer.Game.Finished`.
-    - [ ] Update all references in Aggregates, Projectors, and Tests.
+- [x] **Rename Modules to Standard**
+    - [x] Rename `GameCreated` -> `ChessServer.Game.Started`.
+    - [x] Rename `MoveMade` -> `ChessServer.Game.Progressed`.
+    - [x] Rename `GameFinished` -> `ChessServer.Game.Finished`.
+    - [x] Update all references in Aggregates, Projectors, and Tests.
 
 ### 7.5. Read Model Library
 - [ ] **Migrate to `commanded_ecto_projections`**
@@ -109,6 +109,6 @@ This document serves as the granular, step-by-step task list based on expert arc
 
 ## 📅 Roadmap Summary
 
-1.  **Immediate:** Complete Phase 7.3 (Semantic Events) and 7.4 (Naming Convention).
+1.  **Immediate:** Complete Phase 7.3 (Semantic Events).
 2.  **Next:** Migrate to `commanded_ecto_projections` (Phase 7.5).
 3.  **Future:** Implement Game Modes and Draw Offers (Phase 8).
