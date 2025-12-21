@@ -59,13 +59,13 @@ This document serves as the granular, step-by-step task list based on expert arc
     - [x] Ensure Events are treated as facts, not user input.
 
 ### 7.3. Event Standardization (Semantic Events)
-- [ ] **Define Semantic Events**
-    - [ ] Create `ChessServer.Domain.Events.PieceCaptured` (game_id, piece, square).
-    - [ ] Create `ChessServer.Domain.Events.KingChecked` (game_id, color).
-    - [ ] Create `ChessServer.Domain.Events.PawnPromoted` (game_id, square, piece_type).
-- [ ] **Refactor Aggregate to Emit Rich Events**
-    - [ ] Update `Game.execute` to emit list of events: `[MoveMade, PieceCaptured?, KingChecked?, GameFinished?]`.
-    - [ ] Ensure `MoveMade` remains the primary event for state reconstruction.
+- [x] **Define Semantic Events**
+    - [x] Create `ChessServer.Domain.Events.PieceCaptured` (game_id, piece, square).
+    - [x] Create `ChessServer.Domain.Events.KingChecked` (game_id, color).
+    - [x] Create `ChessServer.Domain.Events.PawnPromoted` (game_id, square, piece_type).
+- [x] **Refactor Aggregate to Emit Rich Events**
+    - [x] Update `Game.execute` to emit list of events: `[MoveMade, PieceCaptured?, KingChecked?, GameFinished?]`.
+    - [x] Ensure `MoveMade` remains the primary event for state reconstruction.
 
 ### 7.4. Naming Convention (Refactoring)
 - [x] **Rename Modules to Standard**
@@ -85,15 +85,15 @@ This document serves as the granular, step-by-step task list based on expert arc
 ## 🚀 Phase 8: New Features & Domain Separation
 
 ### 8.1. Domain Separation
-- [ ] **Extract Pure Logic**
-    - [ ] Create `ChessServer.Chess` context (or similar pure module).
-    - [ ] Move `Board`, `MoveValidator`, `GameRules` logic into this context.
-    - [ ] Ensure `Game` aggregate delegates to `ChessServer.Chess` functions.
-    - [ ] *Goal:* Allow other aggregates (DailyProblem) to use the same logic.
+- [x] **Extract Pure Logic**
+    - [x] Create `ChessServer.Chess` context (or similar pure module).
+    - [x] Move `Board`, `MoveValidator`, `GameRules` logic into this context.
+    - [x] Ensure `Game` aggregate delegates to `ChessServer.Chess` functions.
+    - [x] *Goal:* Allow other aggregates (DailyProblem) to use the same logic.
 
 ### 8.2. Game Modes
-- [ ] **Time Controls**
-    - [ ] Add `time_control` to `CreateGame` command (Blitz, Rapid, Classic).
+- [x] **Time Controls** (Partially Started - Game Mode Field)
+    - [x] Add `game_mode` to `CreateGame` command (Blitz, Rapid, Casual).
     - [ ] Implement Timer Logic (GenServer or check timestamps).
 - [ ] **Draw Offers**
     - [ ] Add command `OfferDraw`.
@@ -101,14 +101,13 @@ This document serves as the granular, step-by-step task list based on expert arc
     - [ ] Add command `RespondToDraw` (Accept/Decline).
 
 ### 8.3. Strong Typing
-- [ ] **Refactor Primitives**
-    - [ ] Replace `:white`/`:black` atoms with `ChessServer.Domain.Color` struct or Enum where appropriate.
+- [x] **Refactor Primitives** (Partially Started)
+    - [x] Replace `:white`/`:black` atoms with `ChessServer.Domain.Color` struct or Enum where appropriate.
     - [ ] Ensure type safety in Command definitions.
 
 ---
 
 ## 📅 Roadmap Summary
 
-1.  **Immediate:** Complete Phase 7.3 (Semantic Events).
-2.  **Next:** Migrate to `commanded_ecto_projections` (Phase 7.5).
-3.  **Future:** Implement Game Modes and Draw Offers (Phase 8).
+1.  **Next:** Migrate to `commanded_ecto_projections` (Phase 7.5).
+2.  **Future:** Implement Draw Offers (Phase 8.2).

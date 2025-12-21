@@ -29,6 +29,7 @@ defmodule ChessServer.MixProject do
       {:postgrex, ">= 0.0.0"},
       {:eventstore, "~> 1.4"},
       {:commanded, "~> 1.4"},
+      {:commanded_ecto_projections, "~> 1.4"},
       {:jason, "~> 1.4"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},

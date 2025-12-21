@@ -8,11 +8,16 @@ defmodule ChessServer.Game do
   # Command Handlers
 
   def execute(nil, %CreateGame{} = cmd) do
-    %Started{
-      game_id: cmd.game_id,
-      white_player: cmd.white_player,
-      black_player: cmd.black_player
-    }
+    if cmd.game_mode == :rated and cmd.white_player == cmd.black_player do
+      {:error, :cannot_play_against_self_in_rated}
+    else
+      %Started{
+        game_id: cmd.game_id,
+        white_player: cmd.white_player,
+        black_player: cmd.black_player,
+        game_mode: cmd.game_mode
+      }
+    end
   end
 
   def execute(%GameState{}, %CreateGame{}), do: {:error, :game_already_exists}
@@ -32,19 +37,13 @@ defmodule ChessServer.Game do
   # State Mutators (Apply)
 
   def apply(nil, %Started{} = event) do
-    Chess.new_game(event.game_id, event.white_player, event.black_player)
+    Chess.new_game(event.game_id, event.white_player, event.black_player, event.game_mode)
   end
-
-  # We still apply standard events to update state.
-  # Semantic events (Captured, Checked) generally don't change state reconstruction if Progressed/MoveMade has all info.
-  # But we must handle them to avoid crashing if they are in the stream.
 
   alias ChessServer.Game.Progressed
 
   def apply(%GameState{} = state, %Progressed{} = event) do
     {:ok, move} = Move.from_strings(event.from, event.to, event.promotion)
-    # We use the internal logic to fast-forward state.
-    # Ideally `Chess.apply_event` but `GameState.make_move` is fine.
     case ChessServer.Domain.GameState.make_move(state, move) do
       {:ok, new_state} -> new_state
       {:error, _} -> state
@@ -56,6 +55,5 @@ defmodule ChessServer.Game do
     %{state | status: event.reason}
   end
 
-  # Semantic events are ignored for state reconstruction as `Progressed` contains the state transition (implicit or explicit FEN)
   def apply(%GameState{} = state, _semantic_event), do: state
 end

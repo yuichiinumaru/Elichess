@@ -9,19 +9,13 @@ defmodule ChessServer.Chess do
   alias ChessServer.Domain.Logic.GameRules
   alias ChessServer.Game.{Progressed, Finished, PieceCaptured, KingChecked, PawnPromoted}
 
-  def new_game(game_id, white, black) do
-    GameState.new(game_id, white, black)
+  def new_game(game_id, white, black, mode \\ :casual) do
+    GameState.new(game_id, white, black, mode)
   end
 
   def make_move(%GameState{status: :active} = state, %Move{} = move) do
     with :ok <- MoveValidator.valid_move?(state, move) do
       # Calculate transitions and events
-      # We need to perform the move and "spy" on what happened.
-      # Since GameState.make_move logic was monolithic, we might duplicate some checks or
-      # refactor GameState to return more info.
-      # For now, I will reimplement the high-level flow here to extract events,
-      # calling lower-level Board/GameState helpers.
-
       apply_move_with_events(state, move)
     else
       err -> err
@@ -59,9 +53,6 @@ defmodule ChessServer.Chess do
     end
 
     # 2. Apply Move (State Transition)
-    # We reuse GameState.make_move logic but we need to trust it returns valid state.
-    # Ideally GameState.make_move should be "pure data transformation".
-    # I'll rely on GameState.make_move to do the heavy lifting of board updates, rights, etc.
     case GameState.make_move(state, move) do
       {:ok, new_state} ->
         # 3. Promotion?
@@ -76,13 +67,6 @@ defmodule ChessServer.Chess do
         end
 
         # 4. Check?
-        # Is the opponent (new_state.turn_color) now in check?
-        # GameState.make_move switches turn. So if I moved (White), now it is Black's turn.
-        # I want to know if Black is in check.
-        # The internal logic of GameState (or CheckValidator) checks this.
-        # But GameState doesn't expose "is_checked" flag explicitly in struct (it calculates status).
-
-        # We can check check_validator.
         is_check = ChessServer.Domain.Logic.CheckValidator.is_in_check?(new_state.board, new_state.turn_color)
 
         check_event = if is_check do

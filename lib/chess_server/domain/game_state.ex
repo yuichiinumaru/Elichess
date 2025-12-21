@@ -10,6 +10,7 @@ defmodule ChessServer.Domain.GameState do
     :game_id,
     :white_player,
     :black_player,
+    :game_mode,
     :board,
     :turn_color,
     :status,
@@ -19,11 +20,12 @@ defmodule ChessServer.Domain.GameState do
     :half_move_clock
   ]
 
-  def new(game_id, white_player, black_player) do
+  def new(game_id, white_player, black_player, game_mode \\ :casual) do
     %__MODULE__{
       game_id: game_id,
       white_player: white_player,
       black_player: black_player,
+      game_mode: game_mode,
       board: Board.initial_setup(),
       turn_color: :white,
       status: :active,
