@@ -75,10 +75,10 @@ This document serves as the granular, step-by-step task list based on expert arc
     - [x] Update all references in Aggregates, Projectors, and Tests.
 
 ### 7.5. Read Model Library
-- [ ] **Migrate to `commanded_ecto_projections`**
+- [x] **Migrate to `commanded_ecto_projections`**
     - [x] Add dependency `commanded_ecto_projections`.
     - [x] Replace `GameProjector` (EventHandler) with `EctoProjection` module.
-    - [ ] Verify database migrations and replay capability.
+    - [x] Verify database migrations and replay capability.
 
 ---
 
