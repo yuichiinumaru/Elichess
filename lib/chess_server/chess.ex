@@ -9,8 +9,8 @@ defmodule ChessServer.Chess do
   alias ChessServer.Domain.Logic.GameRules
   alias ChessServer.Game.{Progressed, Finished, PieceCaptured, KingChecked, PawnPromoted}
 
-  def new_game(game_id, white, black) do
-    GameState.new(game_id, white, black)
+  def new_game(game_id, white, black, time_control \\ nil) do
+    GameState.new(game_id, white, black, time_control)
   end
 
   def make_move(%GameState{status: :active} = state, %Move{} = move) do

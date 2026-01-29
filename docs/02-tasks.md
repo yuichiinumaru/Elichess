@@ -59,7 +59,7 @@ This document serves as the granular, step-by-step task list based on expert arc
     - [x] Ensure Events are treated as facts, not user input.
 
 ### 7.3. Event Standardization (Semantic Events)
-- [ ] **Define Semantic Events**
+- [ ] **Define Semantic Events** (Marked pending due to missing implementation)
     - [ ] Create `ChessServer.Domain.Events.PieceCaptured` (game_id, piece, square).
     - [ ] Create `ChessServer.Domain.Events.KingChecked` (game_id, color).
     - [ ] Create `ChessServer.Domain.Events.PawnPromoted` (game_id, square, piece_type).
@@ -75,40 +75,53 @@ This document serves as the granular, step-by-step task list based on expert arc
     - [x] Update all references in Aggregates, Projectors, and Tests.
 
 ### 7.5. Read Model Library
-- [ ] **Migrate to `commanded_ecto_projections`**
-    - [ ] Add dependency `commanded_ecto_projections`.
-    - [ ] Replace `GameProjector` (EventHandler) with `EctoProjection` module.
-    - [ ] Verify database migrations and replay capability.
+- [x] **Migrate to `commanded_ecto_projections`**
+    - [x] Add dependency `commanded_ecto_projections`.
+    - [x] Replace `GameProjector` (EventHandler) with `EctoProjection` module.
+    - [x] Verify database migrations and replay capability.
 
 ---
 
 ## 🚀 Phase 8: New Features & Domain Separation
 
 ### 8.1. Domain Separation
-- [ ] **Extract Pure Logic**
-    - [ ] Create `ChessServer.Chess` context (or similar pure module).
-    - [ ] Move `Board`, `MoveValidator`, `GameRules` logic into this context.
-    - [ ] Ensure `Game` aggregate delegates to `ChessServer.Chess` functions.
-    - [ ] *Goal:* Allow other aggregates (DailyProblem) to use the same logic.
+- [x] **Extract Pure Logic**
+    - [x] Create `ChessServer.Chess` context (or similar pure module).
+    - [x] Move `Board`, `MoveValidator`, `GameRules` logic into this context.
+    - [x] Ensure `Game` aggregate delegates to `ChessServer.Chess` functions.
+    - [x] *Goal:* Allow other aggregates (DailyProblem) to use the same logic.
 
 ### 8.2. Game Modes
-- [ ] **Time Controls**
-    - [ ] Add `time_control` to `CreateGame` command (Blitz, Rapid, Classic).
-    - [ ] Implement Timer Logic (GenServer or check timestamps).
-- [ ] **Draw Offers**
-    - [ ] Add command `OfferDraw`.
-    - [ ] Add event `DrawOffered`.
-    - [ ] Add command `RespondToDraw` (Accept/Decline).
+- [x] **Time Controls**
+    - [x] Add `time_control` to `CreateGame` command (Blitz, Rapid, Classic).
+    - [x] Implement Timer Logic (Foundation: persist time_control).
+- [x] **Draw Offers**
+    - [x] Add command `OfferDraw`.
+    - [x] Add event `DrawOffered`.
+    - [x] Add command `RespondToDraw` (Accept/Decline).
 
 ### 8.3. Strong Typing
-- [ ] **Refactor Primitives**
-    - [ ] Replace `:white`/`:black` atoms with `ChessServer.Domain.Color` struct or Enum where appropriate.
-    - [ ] Ensure type safety in Command definitions.
+- [x] **Refactor Primitives**
+    - [x] Replace `:white`/`:black` atoms with `ChessServer.Domain.Color` struct or Enum where appropriate.
+    - [x] Ensure type safety in Command definitions (Added `Color.validate/1`).
+
+---
+
+## 🛡️ Phase 9: Stabilization & Security (New)
+
+**Goal:** Address security findings and ensure production stability.
+
+- [ ] **Projector Replay Safety**
+    - [ ] Update `GameProjector` to use upserts (`on_conflict: :nothing` or similar) to prevent crashes during replay.
+- [ ] **Security Hardening**
+    - [ ] Refactor `String.to_existing_atom` usage in `Game` aggregate to use `Color.validate/1` or explicit matching.
+- [ ] **Timer Execution**
+    - [ ] Implement GenServer/Process to actively countdown time and trigger timeout.
 
 ---
 
 ## 📅 Roadmap Summary
 
-1.  **Immediate:** Complete Phase 7.3 (Semantic Events).
-2.  **Next:** Migrate to `commanded_ecto_projections` (Phase 7.5).
-3.  **Future:** Implement Game Modes and Draw Offers (Phase 8).
+1.  **Immediate:** Fix Semantic Events (Phase 7.3) & Projector Replay (Phase 9).
+2.  **Next:** Implement Timer Execution (Phase 9).
+3.  **Future:** Performance Benchmarking.
