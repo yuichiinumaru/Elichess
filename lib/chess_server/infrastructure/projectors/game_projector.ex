@@ -1,75 +1,68 @@
 defmodule ChessServer.Infrastructure.Projectors.GameProjector do
-  use Commanded.Event.Handler,
+  use Commanded.Projections.Ecto,
     application: ChessServer.App,
+    repo: ChessServer.Repo,
     name: "GameProjector"
 
   alias ChessServer.Infrastructure.Projections.Game
   alias ChessServer.Game.{Started, Progressed, Finished}
-  alias ChessServer.Repo
   alias Phoenix.PubSub
 
-  @doc """
-  Handle Started event: Insert a new game row directly.
-  """
-  def handle(%Started{} = event, _metadata) do
+  project %Started{} = event, _metadata, fn multi ->
     game = %Game{
       id: event.game_id,
       white_player: event.white_player,
       black_player: event.black_player,
       status: "active",
       turn_color: "white",
-      fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", # Initial FEN
+      fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
       move_count: 0
     }
 
-    # Use insert! to bypass changeset validation and raise on error
-    result = Repo.insert!(game)
-
-    broadcast_update(event.game_id, result)
-
-    {:ok, result}
+    Ecto.Multi.insert(multi, :game, game)
   end
 
-  @doc """
-  Handle Progressed event: Update existing game row directly.
-  """
-  def handle(%Progressed{} = event, _metadata) do
-    # Fetch current state. If not found, it's a fatal error in projection consistency.
-    game = Repo.get!(Game, event.game_id)
-
-    # Update directly
-    changes = [
-      fen: event.fen,
-      turn_color: Atom.to_string(event.turn_color),
-      move_count: game.move_count + 1
-    ]
-
-    result = game
-    |> Ecto.Changeset.change(changes)
-    |> Repo.update!()
-
-    broadcast_update(event.game_id, result)
-
-    {:ok, result}
+  project %Progressed{} = event, _metadata, fn multi ->
+    multi
+    |> Ecto.Multi.run(:fetch_game, fn repo, _changes ->
+      case repo.get(Game, event.game_id) do
+        nil -> {:error, :not_found}
+        game -> {:ok, game}
+      end
+    end)
+    |> Ecto.Multi.update(:update_game, fn %{fetch_game: game} ->
+      Ecto.Changeset.change(game,
+        fen: event.fen,
+        turn_color: Atom.to_string(event.turn_color),
+        move_count: game.move_count + 1
+      )
+    end)
   end
 
-  @doc """
-  Handle Finished event.
-  """
-  def handle(%Finished{} = event, _metadata) do
-    game = Repo.get!(Game, event.game_id)
-
-    result = game
-    |> Ecto.Changeset.change(status: Atom.to_string(event.reason), winner: event.winner)
-    |> Repo.update!()
-
-    broadcast_update(event.game_id, result)
-
-    {:ok, result}
+  project %Finished{} = event, _metadata, fn multi ->
+    multi
+    |> Ecto.Multi.run(:fetch_game, fn repo, _changes ->
+      case repo.get(Game, event.game_id) do
+        nil -> {:error, :not_found}
+        game -> {:ok, game}
+      end
+    end)
+    |> Ecto.Multi.update(:update_game, fn %{fetch_game: game} ->
+      Ecto.Changeset.change(game,
+        status: Atom.to_string(event.reason),
+        winner: event.winner
+      )
+    end)
   end
 
-  defp broadcast_update(game_id, game) do
-    # Broadcast to "games:ID" topic
-    PubSub.broadcast(ChessServer.PubSub, "games:#{game_id}", {:game_updated, game})
+  @impl Commanded.Projections.Ecto
+  def after_update(_event, _metadata, changes) do
+    # Extract game from Multi result. Keys depend on the project block logic.
+    game = changes[:game] || changes[:update_game]
+
+    if game do
+      PubSub.broadcast(ChessServer.PubSub, "games:#{game.id}", {:game_updated, game})
+    end
+    :ok
   end
 end
