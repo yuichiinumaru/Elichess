@@ -59,13 +59,13 @@ This document serves as the granular, step-by-step task list based on expert arc
     - [x] Ensure Events are treated as facts, not user input.
 
 ### 7.3. Event Standardization (Semantic Events)
-- [ ] **Define Semantic Events** (Marked pending due to missing implementation)
-    - [ ] Create `ChessServer.Domain.Events.PieceCaptured` (game_id, piece, square).
-    - [ ] Create `ChessServer.Domain.Events.KingChecked` (game_id, color).
-    - [ ] Create `ChessServer.Domain.Events.PawnPromoted` (game_id, square, piece_type).
-- [ ] **Refactor Aggregate to Emit Rich Events**
-    - [ ] Update `Game.execute` to emit list of events: `[MoveMade, PieceCaptured?, KingChecked?, GameFinished?]`.
-    - [ ] Ensure `MoveMade` remains the primary event for state reconstruction.
+- [x] **Define Semantic Events**
+    - [x] Create `ChessServer.Domain.Events.PieceCaptured` (game_id, piece, square).
+    - [x] Create `ChessServer.Domain.Events.KingChecked` (game_id, color).
+    - [x] Create `ChessServer.Domain.Events.PawnPromoted` (game_id, square, piece_type).
+- [x] **Refactor Aggregate to Emit Rich Events**
+    - [x] Update `Game.execute` to emit list of events: `[MoveMade, PieceCaptured?, KingChecked?, GameFinished?]`.
+    - [x] Ensure `MoveMade` remains the primary event for state reconstruction.
 
 ### 7.4. Naming Convention (Refactoring)
 - [x] **Rename Modules to Standard**
@@ -111,10 +111,10 @@ This document serves as the granular, step-by-step task list based on expert arc
 
 **Goal:** Address security findings and ensure production stability.
 
-- [ ] **Projector Replay Safety**
-    - [ ] Update `GameProjector` to use upserts (`on_conflict: :nothing` or similar) to prevent crashes during replay.
-- [ ] **Security Hardening**
-    - [ ] Refactor `String.to_existing_atom` usage in `Game` aggregate to use `Color.validate/1` or explicit matching.
+- [x] **Projector Replay Safety**
+    - [x] Update `GameProjector` to use upserts (`on_conflict: :nothing` or similar) to prevent crashes during replay.
+- [x] **Security Hardening**
+    - [x] Refactor `String.to_existing_atom` usage in `Game` aggregate to use `Color.validate/1` or explicit matching.
 - [ ] **Timer Execution**
     - [ ] Implement GenServer/Process to actively countdown time and trigger timeout.
 

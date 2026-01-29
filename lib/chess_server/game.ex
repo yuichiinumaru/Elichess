@@ -84,8 +84,17 @@ defmodule ChessServer.Game do
     %{state | status: event.reason, draw_offer: nil}
   end
 
+  alias ChessServer.Domain.Color
+
   def apply(%GameState{} = state, %DrawOffered{} = event) do
-    color = if is_binary(event.color), do: String.to_existing_atom(event.color), else: event.color
+    color = case event.color do
+      c when is_atom(c) -> c
+      c when is_binary(c) ->
+        case Color.validate(c) do
+          {:ok, valid_color} -> valid_color
+          _ -> nil # Should not happen if validation passed in execute
+        end
+    end
     %{state | draw_offer: color}
   end
 
