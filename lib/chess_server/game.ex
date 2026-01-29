@@ -102,6 +102,15 @@ defmodule ChessServer.Game do
     %{state | draw_offer: nil}
   end
 
+  def apply(%GameState{} = state, %DrawOffered{} = event) do
+    color = if is_binary(event.color), do: String.to_existing_atom(event.color), else: event.color
+    %{state | draw_offer: color}
+  end
+
+  def apply(%GameState{} = state, %DrawDeclined{}) do
+    %{state | draw_offer: nil}
+  end
+
   # Reset draw offer on move? Usually chess rules say draw offer expires if move is made?
   # The rule is: "A claim of a draw... remains in effect until the opponent accepts it or rejects it... or moves."
   # So we should reset draw_offer on Progressed.
