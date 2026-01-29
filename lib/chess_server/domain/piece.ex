@@ -3,7 +3,10 @@ defmodule ChessServer.Domain.Piece do
   Represents a chess piece.
   """
 
-  @type color :: :white | :black
+  alias ChessServer.Domain.Color
+  import ChessServer.Domain.Color, only: [is_color: 1]
+
+  @type color :: Color.t()
   @type type :: :pawn | :knight | :bishop | :rook | :queen | :king
 
   @type t :: %__MODULE__{
@@ -13,7 +16,7 @@ defmodule ChessServer.Domain.Piece do
 
   defstruct [:color, :type]
 
-  def new(color, type) when color in [:white, :black] and type in [:pawn, :knight, :bishop, :rook, :queen, :king] do
+  def new(color, type) when is_color(color) and type in [:pawn, :knight, :bishop, :rook, :queen, :king] do
     %__MODULE__{color: color, type: type}
   end
 

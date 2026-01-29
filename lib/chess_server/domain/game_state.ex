@@ -16,10 +16,12 @@ defmodule ChessServer.Domain.GameState do
     :move_count,
     :en_passant_target,
     :castling_rights,
-    :half_move_clock
+    :half_move_clock,
+    :time_control,
+    :draw_offer
   ]
 
-  def new(game_id, white_player, black_player) do
+  def new(game_id, white_player, black_player, time_control \\ nil) do
     %__MODULE__{
       game_id: game_id,
       white_player: white_player,
@@ -35,7 +37,9 @@ defmodule ChessServer.Domain.GameState do
         black_king: true,
         black_queen: true
       },
-      half_move_clock: 0
+      half_move_clock: 0,
+      time_control: time_control,
+      draw_offer: nil
     }
   end
 
