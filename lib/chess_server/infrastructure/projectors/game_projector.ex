@@ -16,7 +16,8 @@ defmodule ChessServer.Infrastructure.Projectors.GameProjector do
       status: "active",
       turn_color: "white",
       fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-      move_count: 0
+      move_count: 0,
+      time_control: event.time_control
     }
 
     Ecto.Multi.insert(multi, :game, game)

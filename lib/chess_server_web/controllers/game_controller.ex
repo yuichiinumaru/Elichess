@@ -8,12 +8,15 @@ defmodule ChessServerWeb.GameController do
 
   action_fallback ChessServerWeb.FallbackController
 
-  def create(conn, %{"white_player" => white, "black_player" => black}) do
+  def create(conn, %{"white_player" => white, "black_player" => black} = params) do
     game_id = Ecto.UUID.generate()
+    time_control = params["time_control"] # Optional
+
     command = %CreateGame{
       game_id: game_id,
       white_player: white,
-      black_player: black
+      black_player: black,
+      time_control: time_control
     }
 
     with :ok <- App.dispatch(command) do
@@ -28,6 +31,7 @@ defmodule ChessServerWeb.GameController do
            id: game_id,
            white_player: white,
            black_player: black,
+           time_control: time_control,
            status: "active"
          })
     end

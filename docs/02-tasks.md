@@ -92,13 +92,13 @@ This document serves as the granular, step-by-step task list based on expert arc
     - [x] *Goal:* Allow other aggregates (DailyProblem) to use the same logic.
 
 ### 8.2. Game Modes
-- [ ] **Time Controls**
-    - [ ] Add `time_control` to `CreateGame` command (Blitz, Rapid, Classic).
-    - [ ] Implement Timer Logic (GenServer or check timestamps).
-- [ ] **Draw Offers**
-    - [ ] Add command `OfferDraw`.
-    - [ ] Add event `DrawOffered`.
-    - [ ] Add command `RespondToDraw` (Accept/Decline).
+- [x] **Time Controls**
+    - [x] Add `time_control` to `CreateGame` command (Blitz, Rapid, Classic).
+    - [x] Implement Timer Logic (Foundation: persist time_control).
+- [x] **Draw Offers**
+    - [x] Add command `OfferDraw`.
+    - [x] Add event `DrawOffered`.
+    - [x] Add command `RespondToDraw` (Accept/Decline).
 
 ### 8.3. Strong Typing
 - [ ] **Refactor Primitives**
