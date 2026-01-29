@@ -20,7 +20,7 @@ defmodule ChessServer.Infrastructure.Projectors.GameProjector do
       time_control: event.time_control
     }
 
-    Ecto.Multi.insert(multi, :game, game)
+    Ecto.Multi.insert(multi, :game, game, on_conflict: :replace_all, conflict_target: :id)    
   end
 
   project %Progressed{} = event, _metadata, fn multi ->

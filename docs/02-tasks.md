@@ -107,8 +107,21 @@ This document serves as the granular, step-by-step task list based on expert arc
 
 ---
 
+## 🛡️ Phase 9: Stabilization & Security (New)
+
+**Goal:** Address security findings and ensure production stability.
+
+- [x] **Projector Replay Safety**
+    - [x] Update `GameProjector` to use upserts (`on_conflict: :nothing` or similar) to prevent crashes during replay.
+- [x] **Security Hardening**
+    - [x] Refactor `String.to_existing_atom` usage in `Game` aggregate to use `Color.validate/1` or explicit matching.
+- [ ] **Timer Execution**
+    - [ ] Implement GenServer/Process to actively countdown time and trigger timeout.
+
+---
+
 ## 📅 Roadmap Summary
 
-1.  **Immediate:** Complete Phase 7.3 (Semantic Events).
-2.  **Next:** Migrate to `commanded_ecto_projections` (Phase 7.5).
-3.  **Future:** Implement Game Modes and Draw Offers (Phase 8).
+1.  **Immediate:** Fix Semantic Events (Phase 7.3) & Projector Replay (Phase 9).
+2.  **Next:** Implement Timer Execution (Phase 9).
+3.  **Future:** Performance Benchmarking.
