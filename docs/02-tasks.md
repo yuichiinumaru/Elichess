@@ -101,9 +101,9 @@ This document serves as the granular, step-by-step task list based on expert arc
     - [x] Add command `RespondToDraw` (Accept/Decline).
 
 ### 8.3. Strong Typing
-- [ ] **Refactor Primitives**
-    - [ ] Replace `:white`/`:black` atoms with `ChessServer.Domain.Color` struct or Enum where appropriate.
-    - [ ] Ensure type safety in Command definitions.
+- [x] **Refactor Primitives**
+    - [x] Replace `:white`/`:black` atoms with `ChessServer.Domain.Color` struct or Enum where appropriate.
+    - [x] Ensure type safety in Command definitions (Added `Color.validate/1`).
 
 ---
 

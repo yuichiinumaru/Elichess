@@ -30,13 +30,14 @@ defmodule ChessServer.Game do
     end
   end
 
+  alias ChessServer.Domain.Color
+
   def execute(%GameState{status: :active} = state, %OfferDraw{color: color}) do
-    # Simple validation: valid color?
-    if color in ["white", "black", :white, :black] do
+    with {:ok, valid_color} <- Color.validate(color) do
        # Check if already offered? For now just emit.
-       %DrawOffered{game_id: state.game_id, color: color}
+       %DrawOffered{game_id: state.game_id, color: valid_color}
     else
-       {:error, :invalid_color}
+       _ -> {:error, :invalid_color}
     end
   end
 
